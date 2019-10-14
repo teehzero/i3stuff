@@ -1,5 +1,10 @@
 set $mod Mod1
 
+#declare variables for output to save headache later
+set $dp1 DP-3
+set $dp2 DP-5
+set $dp3 HDMI-0
+
 new_window pixel 1
 new_float normal
 
@@ -64,7 +69,7 @@ bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
+bindsym $mod+Shift+space exec ~/.config/i3/float-toggle.sh &
 
 # change focus between tiling / floating windows
 bindsym $mod+space focus mode_toggle
@@ -95,16 +100,37 @@ set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
+set $ws9 9
+set $ws10 10
+set $ws11 11
+set $ws12 12
+
+# assign workspaces to monitor
+workspace $ws1 output $dp1
+workspace $ws2 output $dp2
+workspace $ws3 output $dp3
+workspace $ws4 output $dp1
+workspace $ws5 output $dp2
+workspace $ws6 output $dp3
+workspace $ws7 output $dp1
+workspace $ws8 output $dp2
+workspace $ws9 output $dp3
+workspace $ws10 output $dp1
+workspace $ws11 output $dp2
+workspace $ws12 output $dp3
+
 
 # switch to workspace
-bindsym $mod+1 workspace $ws1
-bindsym $mod+2 workspace $ws2
-bindsym $mod+3 workspace $ws3
-bindsym $mod+4 workspace $ws4
+bindsym $mod+1 workspace $ws3; workspace $ws1; workspace $ws2;
+bindsym $mod+2 workspace $ws6; workspace $ws4; workspace $ws5;
+bindsym $mod+3 workspace $ws9; workspace $ws7; workspace $ws8;
+bindsym $mod+4 workspace $ws12; workspace $ws10; workspace $ws11;
 bindsym $mod+5 workspace $ws5
 bindsym $mod+6 workspace $ws6
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+
 
 # Move focused container to workspace
 bindsym $mod+Ctrl+1 move container to workspace $ws1
@@ -117,14 +143,15 @@ bindsym $mod+Ctrl+7 move container to workspace $ws7
 bindsym $mod+Ctrl+8 move container to workspace $ws8
 
 # Move to workspace with focused container
-bindsym $mod+Shift+1 move container to workspace $ws1; workspace $ws1
-bindsym $mod+Shift+2 move container to workspace $ws2; workspace $ws2
-bindsym $mod+Shift+3 move container to workspace $ws3; workspace $ws3
-bindsym $mod+Shift+4 move container to workspace $ws4; workspace $ws4
-bindsym $mod+Shift+5 move container to workspace $ws5; workspace $ws5
-bindsym $mod+Shift+6 move container to workspace $ws6; workspace $ws6
-bindsym $mod+Shift+7 move container to workspace $ws7; workspace $ws7
-bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
+bindsym $mod+Shift+1 move container to workspace $ws2; workspace $ws3; workspace $ws1; workspace $ws2;
+bindsym $mod+Shift+2 move container to workspace $ws5; workspace $ws6; workspace $ws4; workspace $ws5;
+bindsym $mod+Shift+3 move container to workspace $ws8; workspace $ws9; workspace $ws7; workspace $ws8;
+bindsym $mod+Shift+4 move container to workspace $ws11; workspace $ws12; workspace $ws10; workspace $ws11;
+# bindsym $mod+Shift+5 move container to workspace $ws5; workspace $ws5
+# bindsym $mod+Shift+6 move container to workspace $ws6; workspace $ws6
+# bindsym $mod+Shift+7 move container to workspace $ws7; workspace $ws7
+# bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
+# bindsym $mod+Shift+9 move container to workspace $ws9; workspace $ws9
 
 # Open specific applications in floating mode
 for_window [title="alsamixer"] floating enable border pixel 1
@@ -144,7 +171,7 @@ for_window [class="Oblogout"] fullscreen enable
 for_window [class="octopi"] floating enable
 for_window [title="About Pale Moon"] floating enable
 for_window [class="Pamac-manager"] floating enable
-for_window [class="Pavucontrol"] floating enable
+for_window [class="Pavucontrol"] floating enable border pixel 10
 for_window [class="qt5ct"] floating enable sticky enable border normal
 for_window [class="Qtconfig-qt4"] floating enable sticky enable border normal
 for_window [class="Simple-scan"] floating enable border normal
@@ -156,28 +183,27 @@ for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="Xfburn"] floating enable
 
 # switch to workspace with urgent window automatically
-for_window [urgent=latest] focus
+# for_window [urgent=latest] focus
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+r restart
+bindsym $mod+Shift+r exec "killall polybar && i3 restart &"
 
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 # Set shut down, restart and locking features
 bindsym $mod+0 mode "$mode_system"
-set $mode_system (l)ock, (e)xit, switch_(u)ser, (s)uspend, (h)ibernate, (r)eboot, (Shift+s)hutdown
+set $mode_system l  | e  | u  | s 鈴 | r 勒 | 0 ⏻
 mode "$mode_system" {
     bindsym l exec --no-startup-id i3exit lock, mode "default"
     bindsym s exec --no-startup-id i3exit suspend, mode "default"
     bindsym u exec --no-startup-id i3exit switch_user, mode "default"
     bindsym e exec --no-startup-id i3exit logout, mode "default"
-    bindsym h exec --no-startup-id i3exit hibernate, mode "default"
     bindsym r exec --no-startup-id i3exit reboot, mode "default"
-    bindsym Shift+s exec --no-startup-id i3exit shutdown, mode "default"
+    bindsym 0 exec --no-startup-id i3exit shutdown, mode "default"
 
     # exit system mode: "Enter" or "Escape"
     bindsym Return mode "default"
@@ -209,22 +235,27 @@ mode "resize" {
 }
 
 # Autostart applications
-exec --no-startup-id nitrogen --restore; sleep 1; compton -b
-exec --no-startup-id nm-applet
+exec --no-startup-id nitrogen --restore; sleep 1; compton -b; discord; spotify
+# exec --no-startup-id nm-applet
 # exec --no-startup-id xfce4-power-manager
-exec --no-startup-id pamac-tray
-exec --no-startup-id clipit
-exec_always --no-startup-id ff-theme-util
+# exec --no-startup-id pamac-tray
+# exec --no-startup-id clipit
+# exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
-exec_always --no-startup-id /$HOME/.config/polybar/i3wmthemer_bar_launch.sh
+exec_always --no-startup-id polybar top
 
 # Theme colors
-client.focused #56737a #1e1e20 #56737a #56737a #56737a
-client.focused_inactive #56737a #1e1e20 #56737a #2c5159 #2c5159
-client.unfocused #56737a #1e1e20 #56737a #2c5159 #2c5159
-client.urgent #56737a #1e1e20 #56737a #2c5159 #2c5159
-client.placeholder #56737a #1e1e20 #56737a #2c5159 #2c5159
-
+#client.focused #56737a #1e1e20 #56737a #56737a #56737a
+#client.focused_inactive #56737a #1e1e20 #56737a #2c5159 #2c5159
+#client.unfocused #56737a #1e1e20 #56737a #2c5159 #2c5159
+#client.urgent #56737a #1e1e20 #56737a #2c5159 #2c5159
+#client.placeholder #56737a #1e1e20 #56737a #2c5159 #2c5159
+# class                 border  bground text    indicator child_border
+client.focused          #CAA0A6 #CA5E6B #FFFFFF #CAA0A6   #CAA0A6
+client.focused_inactive #724141 #A35D5D #FFFFFF #724141   #724141
+client.unfocused        #472828 #222222 #888888 #472828   #472828
+client.urgent           #FF0000 #AA0000 #FFFFFF #FF0000   #FF0000
+client.placeholder      #000000 #0C0C0C #FFFFFF #000000   #0C0C0C
 client.background #1e1e20
 
 # Gaps
